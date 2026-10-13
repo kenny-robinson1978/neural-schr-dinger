@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neural Schrödinger Tests</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root { --paper: #F4F3F9; --panel: #FFFFFF; --ink: #1A1530; --muted: #625C7A; --line: #DCD8E8; --good: #1D7F53; --bad: #B42318; --chip: #ECE9F5;
+    --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif; --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #110E1C; --panel: #19152A; --ink: #ECE9F7; --muted: #A39DBA; --line: #2C2642; --good: #5BD39A; --bad: #FF7A6E; --chip: #221C38; color-scheme: dark; } }
+  :root[data-theme="dark"] { --paper: #110E1C; --panel: #19152A; --ink: #ECE9F7; --muted: #A39DBA; --line: #2C2642; --good: #5BD39A; --bad: #FF7A6E; --chip: #221C38; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 var(--f-body); }
+  main { max-width: 860px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 48px; display: grid; gap: 18px; }
+  h1 { margin: 0; font-size: 26px; }
+  p { margin: 0; color: var(--muted); }
+  .summary { font: 500 14px var(--f-mono); padding: 12px 14px; border-radius: 6px; background: var(--chip); }
+  .summary.ok { color: var(--good); } .summary.bad { color: var(--bad); }
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 500 12px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  td.d { font: 12.5px var(--f-mono); color: var(--muted); }
+  td.ms { font: 12.5px var(--f-mono); text-align: right; white-space: nowrap; }
+  .pass { color: var(--good); font: 600 12px var(--f-mono); } .fail { color: var(--bad); font: 600 12px var(--f-mono); }
+  .wrap { overflow-x: auto; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Neural Schrödinger test suite</h1>
+  <p>Unit tests for the autodiff engine, the exact eigensolver and the variational physics, plus one integration test that trains a real ground state. <a href="../index.html">Back to the app</a></p>
+  <div class="summary" id="summary">Running…</div>
+  <div class="wrap"><table><thead><tr><th>Result</th><th>Test</th><th>Detail</th><th>Time</th></tr></thead><tbody id="rows"></tbody></table></div>
+</main>
+<script src="../src/engine.js"></script>
+<script src="../src/eigensolver.js"></script>
+<script src="../src/solver.js"></script>
+<script src="tests.js"></script>
+<script>
+  setTimeout(() => {
+    const res = NQ.tests.runTests({ includeSlow: true });
+    const passed = res.filter(r => r.pass).length;
+    const total = res.reduce((a, r) => a + r.ms, 0);
+    const s = document.getElementById("summary");
+    s.textContent = `${passed} / ${res.length} passed in ${(total / 1000).toFixed(2)} s`;
+    s.className = "summary " + (passed === res.length ? "ok" : "bad");
+    document.getElementById("rows").innerHTML = res.map(r => `
+      <tr><td class="${r.pass ? "pass" : "fail"}">${r.pass ? "PASS" : "FAIL"}</td>
+      <td><b>${r.group}</b> · ${r.name}</td><td class="d">${r.detail}</td><td class="ms">${r.ms.toFixed(0)} ms</td></tr>`).join("");
+  }, 50);
+</script>
+</body>
+</html>
